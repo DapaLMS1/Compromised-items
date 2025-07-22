@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compromised Item Detective Challenge</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-dark-purple: #532A8C;
+      --color-medium-purple: #9D8ABB;
+      --color-green: #7ABF49;
+      --color-light-green: #96BF78;
+      --color-light-grey: #F2F2F2;
+      --color-tertiary-purple: #C3ACE8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-light-grey);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 900px;
+      width: 100%;
+      padding: 30px;
+      text-align: center;
+      border: 2px solid var(--color-medium-purple);
+    }
+
+    h2 {
+      color: var(--color-dark-purple);
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #333;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .tile-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .info-tile {
+      background-color: var(--color-tertiary-purple);
+      border: 2px solid var(--color-medium-purple);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: calc(25% - 15px);
+      min-width: 150px;
+      box-sizing: border-box;
+    }
+
+    .info-tile:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      background-color: var(--color-medium-purple);
+      color: white;
+    }
+
+    .info-tile.active {
+      background-color: var(--color-dark-purple);
+      color: white;
+      border-color: var(--color-green);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-tile img {
+      max-width: 90px;
+      height: auto;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .info-tile span {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .reveal-content {
+      background-color: var(--color-light-grey);
+      border: 2px solid var(--color-tertiary-purple);
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 20px;
+      text-align: left;
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #333;
+      line-height: 1.6;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+
+    .reveal-content.visible {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .tile-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .info-tile {
+        width: 100%;
+        min-width: unset;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="text-lg mb-8">Select an icon below to reveal important information about common signs of compromised sterilised items.</p>
+
+    <div class="tile-container" id="infoTiles">
+      <div class="info-tile" data-topic="dampness">
+        <img src="images/dampness.png" alt="Dampness">
+        <span>Dampness</span>
+      </div>
+      <div class="info-tile" data-topic="damaged-bags">
+        <img src="images/damaged-bags.png" alt="Damaged Bags or Packaging">
+        <span>Damaged Bags or Packaging</span>
+      </div>
+      <div class="info-tile" data-topic="crushed-packs">
+        <img src="images/crushed-packs.png" alt="Crushed Packs">
+        <span>Crushed Packs</span>
+      </div>
+      <div class="info-tile" data-topic="incorrect-indicators">
+        <img src="images/incorrect-indicators.png" alt="Incorrect Indicator Changes">
+        <span>Incorrect Indicator Changes</span>
+      </div>
+    </div>
+
+    <div class="reveal-content" id="revealedInfo">
+      Select an icon above to learn more!
+    </div>
+  </div>
+
+  <script>
+    const infoTiles = document.getElementById('infoTiles');
+    const revealedInfo = document.getElementById('revealedInfo');
+
+    const contentMap = {
+      'dampness': "Any moisture on or within the sterilisation packaging indicates a failed cycle, as steam needs to be completely removed for sterility to be maintained.",
+      'damaged-bags': "Tears, punctures, or compromised seals on sterilisation bags or wraps mean the sterile barrier has been breached, making the contents non-sterile.",
+      'crushed-packs': "If a pack appears crushed or significantly deformed, it suggests potential damage to the contents or inadequate steam penetration during the cycle.",
+      'incorrect-indicators': "Sterilisation bags and packs typically have chemical indicators (like lines or arrows) that change colour when exposed to the correct sterilisation conditions (e.g., temperature). If these indicators have not changed as expected, it means the item did not reach the required sterilisation parameters. Similarly, if biological indicators (which contain spores) do not show a successful result after incubation, the load is considered compromised."
+    };
+
+    infoTiles.addEventListener('click', (event) => {
+      const clickedTile = event.target.closest('.info-tile');
+      if (clickedTile) {
+        document.querySelectorAll('.info-tile').forEach(tile => tile.classList.remove('active'));
+        clickedTile.classList.add('active');
+
+        const topic = clickedTile.dataset.topic;
+        revealedInfo.textContent = contentMap[topic];
+        revealedInfo.classList.add('visible');
+      }
+    });
+
+    window.onload = () => {
+      revealedInfo.textContent = "Select an icon above to learn more!";
+      revealedInfo.classList.add('visible');
+    };
+  </script>
+</body>
+</html>
